@@ -1,10 +1,15 @@
-import React, { use, useState } from "react"
+import React, { useState } from "react"
 import { Link } from "react-router-dom"
 import { validateEmail } from "../../utils/helper"
 import AuthLayout from "../../components/layouts/AuthLayout"
 import ProfilePhotoSelector from "../../components/Inputs/ProfilePhotoSelector"
 import Input from "../../components/Inputs/Input"
-
+import axiosInstance from "../../utils/axiosinstance"
+import { API_PATHS } from "../../utils/apiPaths"
+import { useContext } from "react"
+import { UserContext } from "../../context/userContext"
+import { useNavigate } from "react-router-dom"
+import uploadImage from "../../utils/uploadImage"
 const SignUp = () => {
     const [profilePic, setProfilePic] = useState(null)
     const [fullName, setFullName] = useState("")
@@ -14,9 +19,12 @@ const SignUp = () => {
 
     const [error, setError] = useState(null)
 
+    const {updateUser} = useContext(UserContext)
+    const navigate = useNavigate()
 
     const handleSignUp = async (e) => {
             e.preventDefault()
+            let profileImageUrl = ''
     
             if (!fullName) {
                 setError("Please enter full name")
@@ -32,9 +40,47 @@ const SignUp = () => {
             }
     
             setError("")
+
+
+            try {
+                if (profilePic) {
+                    const imgUploadRes = await uploadImage(profilePic)
+                    profileImageUrl = imgUploadRes.imageUrl || ""
+                }
+                const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, {
+                name:fullName, 
+                email, 
+                password, 
+                profileImageUrl,
+                adminInviteToken
+            })
+                const {token, role} = response.data
+
+                if (token) {
+                    localStorage.setItem("token", token)
+                    updateUser(response.data)
+
+
+                    if (role === "admin") {
+                        navigate("/admin/dashboard")
+                    } else {
+                        navigate("/user/dashboard")
+                    }
+                }
+            } catch  (error) {
+                if (error.response && error.response.data.message) {
+                    setError(error.response.data.message)
+                } else {
+                    
+                    setError("Something went wrong. Please try again")
+                }
+            }
     
     
         }
+
+
+        
     return (
         <AuthLayout>
             <div className="lg:w-[100%] h-auto md:h-full mt-10 md:mt-0 flex flex-col justify-center">
@@ -46,28 +92,28 @@ const SignUp = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Input
                         value={fullName}
-                        onChange={(target) => setFullName(target.value)}
+                        onChange={(event) => setFullName(event.target.value)}
                         label="Full Name"
                         placeholder="Enter your full name"
                         type="text"/>
 
                         <Input
                         value={email}
-                        onChange={(target) => setEmail(target.value)}
+                        onChange={(event) => setEmail(event.target.value)}
                         label="Email Address"
                         placeholder="abcd@gmail.com"
                         type="text"/>
 
                         <Input
                         value={password}
-                        onChange={(target) => setPassword(target.value)}
+                        onChange={(event) => setPassword(event.target.value)}
                         label="Password"
                         placeholder="Min 8 characters"
                         type="password"/>
 
 <Input
-                        value={password}
-                        onChange={(target) => setPassword(target.value)}
+                        value={adminInviteToken}
+                        onChange={(event) => setAdminInviteToken(event.target.value)}
                         label="Admin Invite Token"
                         placeholder="6 digit Code"
                         type="text"/>

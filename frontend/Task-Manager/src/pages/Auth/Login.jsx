@@ -6,11 +6,15 @@ import Input from "../../components/Inputs/Input"
 import { validateEmail } from "../../utils/helper"
 import { API_PATHS } from "../../utils/apiPaths"
 import axiosInstance from "../../utils/axiosinstance"
+import { UserContext } from "../../context/userContext"
+import { useContext } from "react"
+
 const Login = () => {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [error, setError] = useState(null)
 
+    const {updateUser} = useContext(UserContext)
     const navigate = useNavigate()
     
     const handleLogin = async (e) => {
@@ -37,7 +41,7 @@ const Login = () => {
 
             if (token) {
                 localStorage.setItem("token", token)
-
+                updateUser(response.data)
                 if (role==="admin") {
                     navigate("/admin/dashboard")
                 } else {
