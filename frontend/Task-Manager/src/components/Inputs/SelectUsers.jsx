@@ -2,6 +2,9 @@ import React , {useState, useEffect} from "react"
 import axiosInstance from "../../utils/axiosinstance"
 import { API_PATHS } from "../../utils/apiPaths" 
 import {LuUsers} from "react-icons/lu"
+import Model from "../Model"
+import AvatarGroup from "../layouts/AvatarGroup"
+
 
 const SelectUsers = ({selectedUsers, setSelectedUsers}) => {
     const [allUsers, setAllUsers] = useState([])
@@ -19,7 +22,7 @@ const SelectUsers = ({selectedUsers, setSelectedUsers}) => {
         }
     }
 
-    const toogleUserSelection = (userId) => {
+    const toggleUserSelection = (userId) => {
         setTempSelectedUsers((prev) => 
             prev.includes(userId) 
             ? prev.filter((id) => id !== userId)
@@ -33,6 +36,11 @@ const SelectUsers = ({selectedUsers, setSelectedUsers}) => {
     }
 
     const selectedUserAvatars = allUsers.filter((user) => selectedUsers.includes(user._id)).map((user) => user.profileImageUrl)
+
+
+    useEffect(() => {
+        getAllUsers()
+    }, [])
 
     useEffect(() => {
         if (selectedUsers.length === 0) {
@@ -53,7 +61,60 @@ const SelectUsers = ({selectedUsers, setSelectedUsers}) => {
             </button>
         )}
 
+        {selectedUserAvatars.length > 0 && (
+            <div className = "" onClick = {() => setIsModalOpen(true)}>
+                <AvatarGroup avatars = {selectedUserAvatars} maxVisible = {3} />
+            </div>
+        )}
+
+        <Model 
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            title="Select Users"
+        
+        >
+
+        <div className="space-y-4 h-[60vh] overflow-y-auto">
+            {allUsers.map((user) => (
+                <div key = {user._id}
+                    className="flex items-center gap-4 p-3 border-b border-gray-200"
+                >
+                    <img 
+                    src = {user.profileImageUrl}
+                    alt= {user.name}
+                    className="w-10 h-10 rounded-full"
+                    />
+
+                    <div className="flex-1">
+                        <p className="text-gray-800 font-bold">
+                            {user.name}
+                        </p>
+
+                        <p className="text-[13px] text-gray-500">{user.email}</p>
+
+                    </div>
+
+                    <input 
+                        type="checkbox"
+                        checked={tempSelectedUsers.includes(user._id)}
+                        onChange={() => toggleUserSelection(user._id)}
+                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm outline-none cursor-pointer"
+                    />
+
+                </div>
+                    ))}
         </div>
+
+        <div className = "flex justify-end gap-4 pt-4">
+            <button className = "card-btn" onClick = {() => setIsModalOpen(false)}>
+                CANCEL
+            </button>
+            <button className= "card-btn-fill" onClick = {handleAssign}>
+                DONE
+            </button>
+        </div>
+        </Model>
+    </div>
     )
 }
 

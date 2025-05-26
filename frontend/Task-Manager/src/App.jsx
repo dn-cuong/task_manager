@@ -7,6 +7,8 @@ import {
     Navigate
 } from "react-router-dom"
 
+import toast, { Toaster } from 'react-hot-toast';
+
 import Login from './pages/Auth/Login'
 import SignUp from './pages/Auth/SignUp'
 import PrivateRoute from './routes/PrivateRoute'
@@ -44,7 +46,7 @@ function App() {
                 {/* User Routes*/}
                 <Route element= {<PrivateRoute allowedRoles={["admin"]}/>}>
                     <Route path='/user/dashboard' element = {<UserDashboard/>}/>
-                    <Route path='/user/my-tasks' element = {<MyTasks/>}/>
+                    <Route path='/user/tasks' element = {<MyTasks/>}/>
                     <Route path='/user/task-details/:id' element = {<ViewTaskDetails/>}/>
                 </Route>
 
@@ -52,6 +54,15 @@ function App() {
             </Routes>
         </Router>
     </div>
+
+
+    <Toaster toastOptions = {{
+        className: "",
+        style : {
+            fontSize: "13px",
+        },
+    }}
+    />
     </UserProvider>
   )
 }

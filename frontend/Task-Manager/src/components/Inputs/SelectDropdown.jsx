@@ -24,7 +24,6 @@ const SelectDropdown = ({ options, value, onChange, placeholder }) => {
                     className = "px-3 py-2 text-sm cursor-pointer hover:bg-gray-100"
                 >
                     {option.label}
-                    {console.log(option)}
                     </div>
                 ))}
             </div>
